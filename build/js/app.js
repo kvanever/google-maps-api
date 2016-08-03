@@ -1,16 +1,71 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-exports.apiKey = "AIzaSyAkCGLHzpptaOohomxS0VnUYFsMhsw1PDQ"
+// var apiKey = require('./../.env').apiKey;
+// var Map = require('./../js/maps.js').mapModule;
 
-},{}],2:[function(require,module,exports){
-exports.mapModule = Map;
+var mapObject;
 
-},{}],3:[function(require,module,exports){
-var apiKey = require('./../.env').apiKey;
-var Map = require('./../js/maps.js').mapModule;
+$( document ).ready(function() {
+  $('#locateUser').click(locateUser);
+  });
 
-$(function() {
-  debugger;
-  $(".map").html('<iframe width="600" height="450" frameborder="0" src="https://www.google.com/maps/embed/v1/place?key=' + apiKey + '&q=Space+Needle,Seattle+WA" allowfullscreen></iframe>');
-})
+function locateUser() {
+  if (navigator.geolocation){
+    var positionOptions = {
+      enableHighAccuracy: true,
+      timeout: 10 * 1000
+    };
+    navigator.geolocation.getCurrentPosition(geolocationSuccess, geolocationError, positionOptions);
+  }
+  else {
+    alert("Your browser doesn't support the Geolocation API");
+  }
+}
 
-},{"./../.env":1,"./../js/maps.js":2}]},{},[3]);
+function geolocationSuccess(position) {
+  var userLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+  var myOptions = {
+    zoom : 16,
+    center : userLatLng,
+    mapTypeId : google.maps.MapTypeId.ROADMAP
+  };
+
+  var mapObject = new google.maps.Map(document.getElementById("map"), myOptions);
+  mapObject.markers = [];
+
+  new google.maps.Marker({
+    map: mapObject,
+    position: userLatLng
+  });
+  mapObject.addListener('dblclick', function(e) {
+    placeMarkerAndPanTo(e.latLng, map);
+    this.markers.push(e.latLng);
+    console.log(this.markers);
+    console.log(mapObject.markers);
+  });
+
+  function placeMarkerAndPanTo(latLng, map) {
+    var marker = new google.maps.Marker({
+    position: latLng,
+    map: mapObject
+  });
+  mapObject.panTo(latLng);
+  }
+
+  function printMarkers() {
+        markerArray.forEach(function(coordinate) {
+          var marker = new google.maps.Marker({
+          position: coordinate
+        }, coordinate);
+      });
+  }
+
+}
+
+
+
+function geolocationError(positionError) {
+  alert(positionError);
+}
+
+},{}]},{},[1]);
