@@ -1,1 +1,0 @@
-exports.testModule = Test;
